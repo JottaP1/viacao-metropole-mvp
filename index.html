@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viação Metrópole | Gestão de Avarias - MVP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f4f6f9; transition: all 0.2s ease; }
+    .navbar-vm { background-color: #002b5c; border-bottom: 3px solid #d90429; }
+    .btn-vm { background-color: #002b5c; color: #fff; min-height: 44px; }
+    .btn-vm:hover { background-color: #001d3d; color: #fff; }
+    body.high-contrast { background-color: #000 !important; color: #ffea00 !important; }
+    body.high-contrast .card, body.high-contrast .table, body.high-contrast .form-control {
+      background-color: #111 !important; color: #ffea00 !important; border-color: #ffea00 !important;
+    }
+    body.high-contrast .navbar-vm { background-color: #000 !important; border-bottom: 3px solid #ffea00 !important; }
+    body.high-contrast .btn-vm { background-color: #ffea00 !important; color: #000 !important; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-vm px-3">
+  <a class="navbar-brand fw-bold" href="#">🚌 VIAÇÃO <span class="text-danger">METRÓPOLE</span></a>
+  <div class="ms-auto d-flex align-items-center gap-2">
+    <button class="btn btn-sm btn-outline-warning" onclick="toggleContrast()">🌓 Alto Contraste</button>
+    <button class="btn btn-sm btn-outline-light" onclick="changeFont(1)">A+</button>
+    <button class="btn btn-sm btn-outline-light" onclick="changeFont(-1)">A-</button>
+    <span class="badge bg-success ms-2">● Sistema Online (ODS 11)</span>
+  </div>
+</nav>
+
+<div class="container my-4" id="mainContainer">
+  <!-- Secção de Login Rápido / Identificação -->
+  <div id="loginBox" class="card shadow-sm mx-auto p-4 mb-4" style="max-width: 440px;">
+    <h4 class="text-center fw-bold mb-1">Acesso Operacional</h4>
+    <p class="text-center text-muted small mb-3">Sistema de Gestão de Avarias de Frota - MVP</p>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Utilizador</label>
+      <input type="text" class="form-control" value="joao.amaral" readonly>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Perfil</label>
+      <input type="text" class="form-control" value="Equipe de Manutenção / Operações" readonly>
+    </div>
+    <button class="btn btn-vm w-100" onclick="entrarSistema()">Entrar no Painel de Frota</button>
+  </div>
+
+  <!-- Painel Principal -->
+  <div id="dashboardBox">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+      <div>
+        <h3 class="fw-bold mb-0">Painel de Gestão de Avarias</h3>
+        <small class="text-muted">Monitoramento em tempo real da frota urbana (ODS 11 - Transporte Inclusivo e Seguro)</small>
+      </div>
+      <div class="d-flex gap-2 mt-2 mt-md-0">
+        <input type="text" id="filtroLinha" class="form-control" placeholder="Filtrar linha ou frota..." onkeyup="filtrarTabela()">
+        <button class="btn btn-vm text-nowrap" onclick="adicionarAvaria()">+ Nova Avaria</button>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4"><div class="card p-3 shadow-sm"><span class="text-muted small">Total de Ocorrências</span><h3 class="fw-bold mb-0" id="totalCount">3</h3></div></div>
+      <div class="col-md-4"><div class="card p-3 shadow-sm border-danger"><span class="text-danger small fw-bold">Alertas Críticos</span><h3 class="fw-bold text-danger mb-0">1</h3></div></div>
+      <div class="col-md-4"><div class="card p-3 shadow-sm border-success"><span class="text-success small fw-bold">Resolvidas</span><h3 class="fw-bold text-success mb-0" id="resolvedCount">1</h3></div></div>
+    </div>
+
+    <div class="card shadow-sm p-3">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0" id="tabelaAvarias">
+          <thead class="table-dark">
+            <tr><th>Data</th><th>Frota</th><th>Linha</th><th>Descrição da Avaria</th><th>Prioridade</th><th>Status</th><th>Ação</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>13/11/2026</td><td class="fw-bold">1204</td><td>374A</td><td>Falha nos travões pneumáticos</td>
+              <td><span class="badge bg-danger">CRÍTICA</span></td><td><span class="badge bg-warning text-dark">Em Análise</span></td>
+              <td><button class="btn btn-sm btn-vm" onclick="resolver(this)">✓ Resolver</button></td>
+            </tr>
+            <tr>
+              <td>13/11/2026</td><td class="fw-bold">1510</td><td>270E</td><td>Superaquecimento no radiador</td>
+              <td><span class="badge bg-secondary">Normal</span></td><td><span class="badge bg-success">Resolvido</span></td>
+              <td><button class="btn btn-sm btn-outline-secondary" disabled>Concluído</button></td>
+            </tr>
+            <tr>
+              <td>13/11/2026</td><td class="fw-bold">1782</td><td>3459</td><td>Elevador PCD com lentidão</td>
+              <td><span class="badge bg-danger">CRÍTICA (ODS 11)</span></td><td><span class="badge bg-danger">Pendente</span></td>
+              <td><button class="btn btn-sm btn-vm" onclick="resolver(this)">✓ Resolver</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="text-center text-muted small py-3">
+  Viação Metrópole Paulista | MVP em Produção • Acessibilidade WCAG AA &amp; ODS 11
+</footer>
+
+<script>
+  let fontSize = 16;
+  function toggleContrast() { document.body.classList.toggle('high-contrast'); }
+  function changeFont(delta) { fontSize = Math.min(22, Math.max(14, fontSize + delta)); document.body.style.fontSize = fontSize + 'px'; }
+  function entrarSistema() { document.getElementById('loginBox').style.display = 'none'; }
+  function resolver(btn) {
+    const row = btn.closest('tr');
+    row.cells[5].innerHTML = '<span class="badge bg-success">Resolvido</span>';
+    btn.disabled = true; btn.innerText = 'Concluído';
+    document.getElementById('resolvedCount').innerText = parseInt(document.getElementById('resolvedCount').innerText) + 1;
+  }
+  function filtrarTabela() {
+    const termo = document.getElementById('filtroLinha').value.toLowerCase();
+    document.querySelectorAll('#tabelaAvarias tbody tr').forEach(tr => {
+      tr.style.display = tr.innerText.toLowerCase().includes(termo) ? '' : 'none';
+    });
+  }
+  function adicionarAvaria() {
+    const tbody = document.querySelector('#tabelaAvarias tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>13/11/2026</td><td class="fw-bold">1905</td><td>412B</td><td>Falha na iluminação interna</td><td><span class="badge bg-secondary">Normal</span></td><td><span class="badge bg-warning text-dark">Em Análise</span></td><td><button class="btn btn-sm btn-vm" onclick="resolver(this)">✓ Resolver</button></td>';
+    tbody.prepend(tr);
+    document.getElementById('totalCount').innerText = parseInt(document.getElementById('totalCount').innerText) + 1;
+  }
+</script>
+</body>
+</html>
