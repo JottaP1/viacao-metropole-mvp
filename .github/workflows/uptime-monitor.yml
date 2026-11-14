@@ -1,0 +1,25 @@
+name: Monitoramento Uptime MVP (Status UP/DOWN)
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar Disponibilidade HTTP em Produção
+        run: |
+          URL="https://jottap1.github.io/viacao-metropole-mvp/"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          echo "Endpoint monitorado: $URL"
+          echo "HTTP Status Code: $STATUS"
+          if [ "$STATUS" -eq 200 ]; then
+            echo "STATUS: UP - Aplicação online e operacional sem falhas."
+          else
+            echo "STATUS: DOWN - Alerta crítico de indisponibilidade!"
+            exit 1
+          fi
